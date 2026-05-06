@@ -236,7 +236,8 @@ struct global {
 			newO2.monitor = this->monitor;
 			return std::move(newO2);
 		}
-		global<T> newO(this->ref, this->name);
+		global<T> newO;
+		newO.ref = this->ref;
 		newO.monitor = this->monitor;
 		this->ref = nullptr;
 		this->name = "unset [swapped out]";
@@ -248,7 +249,9 @@ struct global {
 			LOGE("Invalid global ref at %p \"%s\" was moved!\n", this, name);
 			raise(SIGTRAP);
 		}
-		this->ref = p.ref;
+		if (this->ref) {
+			threadEnv->DeleteGlobalRef(this->ref);
+		}
 		this->name = p.name;
 		this->monitor = p.monitor;
 		p.ref = NULL;
